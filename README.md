@@ -49,7 +49,9 @@ docs/       软件工程流程文档（本项目的学习载体）
 
 ## 已知问题
 
-（开发过程中记录在此，随进度更新）
+- 阅读器主题切换后约 2 秒内选区生成 CFI 可能失败（epub.js 样式应用重排时序），失败时提示重新选择即可
+- 开发模式 Electron 提示 Insecure Content-Security-Policy（无 CSP），打包版本需补充 CSP
+- React StrictMode 已禁用（epub.js 双挂载会产生两个 rendition 实例竞争）
 
 ## 版本记录
 

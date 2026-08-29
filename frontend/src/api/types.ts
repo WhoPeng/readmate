@@ -17,6 +17,7 @@ export interface BookDto {
   format: string
   status: 'unread' | 'reading' | 'finished'
   percent: number
+  progress_cfi: string | null
   current_chapter_index: number | null
   metadata: Record<string, unknown>
   chapter_count: number

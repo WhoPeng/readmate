@@ -9,6 +9,7 @@ __pycache__/
 node_modules/
 dist/
 dist-electron/
+shared/*.js
 
 # 运行时数据（书籍与数据库，不入 Git）
 data/

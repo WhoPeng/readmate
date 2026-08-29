@@ -23,6 +23,7 @@ def _book_dict(book: Book, chapters: bool = False) -> dict:
         "format": book.format,
         "status": book.status,
         "percent": round(book.percent, 1),
+        "progress_cfi": book.progress_cfi,
         "current_chapter_index": book.current_chapter_index,
         "metadata": json.loads(book.metadata_json or "{}"),
         "created_at": book.created_at.isoformat() if book.created_at else None,

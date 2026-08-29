@@ -42,6 +42,12 @@ const json = (body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 })
 
+const jsonPut = (body: unknown): RequestInit => ({
+  method: 'PUT',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+})
+
 export const api = {
   health: () => request<{ app: string; version: string; database: string }>('/health'),
 
@@ -101,7 +107,7 @@ export const api = {
   // 设置
   getSettings: () => request<Record<string, Record<string, unknown>>>(`/settings`),
   putSetting: (key: string, value: Record<string, unknown>) =>
-    request<{ ok: boolean }>(`/settings/${key}`, json({ value_json: value })),
+    request<{ ok: boolean }>(`/settings/${key}`, jsonPut({ value_json: value })),
 
   // 备份
   exportBackup: () => fetch(`${BASE}/backup/export`).then((r) => (r.ok ? r.blob() : Promise.reject(new ApiError(r.status, '导出失败')))),

@@ -1,6 +1,8 @@
 /** 应用外壳：hash 路由 + 顶栏 + 健康状态指示 */
 import { useEffect, useState } from 'react'
 import Library from './pages/Library'
+import BookDetail from './pages/BookDetail'
+import Reader from './pages/Reader'
 import Settings from './pages/Settings'
 import { api } from './api/client'
 
@@ -34,6 +36,14 @@ export default function App() {
 
   const renderPage = () => {
     if (route.startsWith('/library')) return <Library />
+    if (route.startsWith('/book/')) {
+      const id = Number(route.split('/')[2])
+      return <BookDetail bookId={id} />
+    }
+    if (route.startsWith('/reader/')) {
+      const id = Number(route.split('/')[2])
+      return <Reader bookId={id} />
+    }
     if (route.startsWith('/settings')) return <Settings />
     return <div className="empty">页面建设中：{route}</div>
   }
