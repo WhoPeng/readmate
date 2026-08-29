@@ -6,7 +6,7 @@
  * 预算（≈7k tokens/次，适配 8k 上下文模型）：
  *   System 原则 ≤800 ｜ Reader Profile ≤500 ｜ 当前章节 ≤3000 ｜ 历史反思 ≤500 ｜ 对话历史 ≤2000
  */
-import type { ChatMessage } from '../../shared/types'
+import type { ChatMessage } from '../../../shared/types'
 import { SYSTEM_PRINCIPLES } from './prompts'
 
 const BACKEND = 'http://127.0.0.1:8000'
@@ -69,7 +69,7 @@ export async function fetchReaderContext(bookId: number, chapterId?: number): Pr
 }
 
 /** 组装 System 消息（角色 + 场景模板 + 用户画像） */
-function buildSystem(scene: string, data: ReaderContextData, sceneSystem: string): string {
+function buildSystem(data: ReaderContextData, sceneSystem: string): string {
   const parts: string[] = [sceneSystem]
 
   if (data.bookTitle) {
@@ -103,10 +103,10 @@ function buildChapterUser(data: ReaderContextData): string {
 
 export type ChatScene = 'interview' | 'reflect_questions' | 'follow_up' | 'author_position' | 'book_report'
 
-export function buildChatMessages(scene: ChatScene, data: ReaderContextData, sceneSystem: string): ChatMessage[] {
+export function buildChatMessages(_scene: ChatScene, data: ReaderContextData, sceneSystem: string): ChatMessage[] {
   const messages: ChatMessage[] = []
-  messages.push({ role: 'system', content: buildSystem(scene, data, sceneSystem) })
-  if (scene !== 'interview') {
+  messages.push({ role: 'system', content: buildSystem(data, sceneSystem) })
+  if (_scene !== 'interview') {
     const chapter = buildChapterUser(data)
     if (chapter) messages.push({ role: 'user', content: chapter })
   }

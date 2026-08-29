@@ -6,8 +6,8 @@
  * - 访谈场景不注入章节内容
  */
 import { describe, expect, it, vi, afterEach } from 'vitest'
-import { buildChatMessages, fetchReaderContext } from '../../electron/ai/contextBuilder'
-import { INTERVIEW_SYSTEM, AUTHOR_POSITION_SYSTEM } from '../../electron/ai/prompts'
+import { buildChatMessages, fetchReaderContext } from '../src/ai/contextBuilder'
+import { INTERVIEW_SYSTEM, AUTHOR_POSITION_SYSTEM } from '../src/ai/prompts'
 
 afterEach(() => vi.restoreAllMocks())
 

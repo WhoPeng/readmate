@@ -5,6 +5,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import EpubViewer, { type EpubViewerCtrl, type EpubRelocated } from '../reader/EpubViewer'
+import ReflectionPanel, { type ReflectionMode } from '../components/ReflectionPanel'
 import { api } from '../api/client'
 import type { BookDto, HighlightDto } from '../api/types'
 
@@ -30,6 +31,8 @@ export default function Reader({ bookId }: { bookId: number }) {
   const [theme, setTheme] = useState<'light' | 'sepia' | 'dark'>('light')
   const [pendingHighlight, setPendingHighlight] = useState<{ cfiStart: string; cfiEnd: string; text: string } | null>(null)
   const [noteForHighlight, setNoteForHighlight] = useState('')
+  const [panelMode, setPanelMode] = useState<ReflectionMode | null>(null)
+  const [reflectChapter, setReflectChapter] = useState<number | null>(null)
   const saveTimer = useRef<number | null>(null)
 
   // 加载书籍与标注
@@ -42,6 +45,12 @@ export default function Reader({ bookId }: { bookId: number }) {
         setHighlights(hs)
         setPercent(b.percent)
         setCurrentChapter(b.current_chapter_index)
+        // FR-13：新书首次打开 → 自动启动阅读前访谈（已跳过/已完成的不再打扰）
+        const hasIntent = b.intent && b.intent.status !== 'in_progress'
+        if (!hasIntent) {
+          setPanelOpen(true)
+          setPanelMode('interview')
+        }
       })
       .catch((e) => console.error('加载阅读器数据失败', e))
     return () => {
@@ -177,25 +186,41 @@ export default function Reader({ bookId }: { bookId: number }) {
               <button onClick={() => setPendingHighlight(null)}>取消</button>
             </div>
           )}
-          {/* 底栏：读完本章（步骤 15 启用伴读反思） */}
+          {/* 底栏：读完本章 → 章节反思（FR-15） */}
           <div style={{ padding: 10, textAlign: 'center', borderTop: '1px solid var(--border)' }}>
             <button
               className="primary"
               style={{ width: 220 }}
-              onClick={() => (window.location.hash = `#/reader/${book.id}/reflect`)}
+              onClick={() => {
+                setReflectChapter(currentChapter)
+                setPanelMode('reflect')
+                setPanelOpen(true)
+              }}
             >
               读完本章，开始反思
             </button>
           </div>
         </div>
 
-        {/* 右：伴读面板（占位，步骤 15 实现反思对话） */}
+        {/* 右：伴读面板（访谈 / 章节反思） */}
         {panelOpen && (
-          <div style={{ width: 340, borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-            <div style={{ padding: 12, borderBottom: '1px solid var(--border)', fontWeight: 600, fontSize: 14 }}>AI 伴读</div>
-            <div style={{ flex: 1, padding: 12, overflowY: 'auto', fontSize: 13 }} className="muted">
-              伴读功能开发中（步骤 15）。阅读时保持安静，读完一章后可与我讨论。
-            </div>
+          <div style={{ width: 360, borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+            {panelMode && book && (
+              <ReflectionPanel
+                book={book}
+                mode={panelMode}
+                chapterId={panelMode === 'reflect' ? (reflectChapter ?? currentChapter ?? undefined) : undefined}
+                onDone={(kind) => {
+                  if (kind === 'journal') {
+                    // 反思完成：刷新书籍信息（最新 Journal）
+                    api.getBook(bookId).then((b) => setBook(b)).catch(() => undefined)
+                  }
+                  if (kind === 'skipped' || kind === 'intent') {
+                    api.getBook(bookId).then((b) => setBook(b)).catch(() => undefined)
+                  }
+                }}
+              />
+            )}
           </div>
         )}
 

@@ -35,12 +35,12 @@ async function recordCall(sessionKey: string, role: string, content: string, usa
 }
 
 export function registerAiIpc(): void {
-  // 流式对话：事件 'ai:token:{requestId}' 逐块推送
+  // 流式对话：事件 'ai:token:{requestId}' 逐块推送（requestId 由 preload 生成并随请求传入）
   ipcMain.handle('ai:chatStream', async (event, req: ChatRequest) => {
     const config = await store.listProviders().then((list) => list.find((p) => p.id === req.providerId))
     if (!config) throw new Error('Provider 不存在，请先在设置中配置')
     const provider = createProvider(config)
-    const requestId = Math.random().toString(36).slice(2)
+    const requestId = req.requestId ?? Math.random().toString(36).slice(2)
     let full = ''
 
     const usage = await provider.chatStream(

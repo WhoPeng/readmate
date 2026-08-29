@@ -82,7 +82,7 @@ describe('AnthropicProvider', () => {
       'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"一"}}\n\n',
       'event: content_block_delta\ndata: {"type":"content_block_delta","delta":{"type":"text_delta","text":"二"}}\n\n',
     ]))
-    const provider = new AnthropicProvider({ ...aConfig }, () => Promise.resolve('sk-ant'))
+    const provider = new AnthropicProvider({ ...aConfig }, () => Promise.resolve('sk-ant-api03-test-key'))
     const tokens: string[] = []
     await provider.chatStream(
       { messages: [{ role: 'system', content: '你是伴读' }, { role: 'user', content: 'hi' }] },
@@ -94,13 +94,13 @@ describe('AnthropicProvider', () => {
     const body = JSON.parse(String(init.body))
     expect(body.system).toBe('你是伴读') // system 单独传参
     expect(body.messages).toEqual([{ role: 'user', content: 'hi' }])
-    expect(init.headers['x-api-key']).toBe('sk-ant')
+    expect(init.headers['x-api-key']).toBe('sk-ant-api03-test-key')
     expect(init.headers['anthropic-version']).toBeTruthy()
   })
 
   it('非流式：提取 text block 内容', async () => {
     vi.stubGlobal('fetch', mockFetchJson({ content: [{ type: 'text', text: '回答内容' }], usage: { input_tokens: 10, output_tokens: 5 } }))
-    const provider = new AnthropicProvider({ ...aConfig }, () => Promise.resolve('sk-ant'))
+    const provider = new AnthropicProvider({ ...aConfig }, () => Promise.resolve('sk-ant-api03-test-key'))
     const result = await provider.chat({ messages: [] })
     expect(result.text).toBe('回答内容')
     expect(result.usage.completionTokens).toBe(5)

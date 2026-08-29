@@ -26,6 +26,8 @@ export interface ChatRequest {
   messages: ChatMessage[]
   /** 流式回调由 IPC 事件承载，此字段仅为标识 */
   sessionKey?: string
+  /** 流式 token 事件通道标识（preload 生成，main 复用，保证事件能送回调用方） */
+  requestId?: string
 }
 
 export interface ChatUsage {
