@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/env.d.ts","./src/main.tsx","./src/api/client.ts","./src/api/types.ts","./src/pages/library.tsx","./src/pages/settings.tsx","../shared/types.ts"],"version":"5.9.3"}
