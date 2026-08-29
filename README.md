@@ -47,11 +47,22 @@ data/       运行时数据（SQLite + 书籍文件，不入 Git）
 docs/       软件工程流程文档（本项目的学习载体）
 ```
 
-## 已知问题
+## 已知问题（P2）
 
 - 阅读器主题切换后约 2 秒内选区生成 CFI 可能失败（epub.js 样式应用重排时序），失败时提示重新选择即可
 - 开发模式 Electron 提示 Insecure Content-Security-Policy（无 CSP），打包版本需补充 CSP
 - React StrictMode 已禁用（epub.js 双挂载会产生两个 rendition 实例竞争）
+- 主题标签为简化规则（书名截取 + 手动编辑），非 AI 提取
+- AI 生成的"最终想法"需要用户在记录卡片中手动填写
+
+## 使用说明
+
+1. 启动后自动拉起后端（或手动：`backend/.venv/Scripts/python -m uvicorn app.main:app --port 8000`）
+2. 首次使用：设置 → AI 模型配置 → 选择厂商 → 填入 API Key → 测试连接
+3. 书架 → 导入 EPUB → 首次打开自动进入"阅读前访谈"
+4. 读完一章 → 「读完本章」→ 与 AI 讨论 → 生成章节记录
+5. 全书完成 → 书籍详情页「我与这本书」生成思想档案
+6. 数据备份：设置 → 数据备份（导出 zip 不含明文密钥）
 
 ## 版本记录
 
