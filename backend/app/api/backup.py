@@ -22,7 +22,7 @@ router = APIRouter(tags=["backup"])
 BACKUP_META = {"app": "readmate", "version": "1"}
 
 
-@router.post("/backup/export")
+@router.get("/backup/export")
 def api_export_backup(db: Session = Depends(get_db)):
     """导出备份文件（无明文密钥：仅数据库 + 书籍文件）。"""
     buffer = io.BytesIO()

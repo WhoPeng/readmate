@@ -41,6 +41,9 @@ export default function BookDetail({ bookId }: { bookId: number }) {
               {book.status === 'finished' ? '重新阅读' : book.status === 'reading' ? '继续阅读' : '开始阅读'}
             </button>
             {book.status !== 'unread' && <span className="muted" style={{ alignSelf: 'center' }}>已读 {book.percent}%</span>}
+            {book.report && (
+              <button onClick={() => (window.location.hash = `#/book/${book.id}/report`)}>我与这本书</button>
+            )}
           </div>
           {book.intent && (
             <div className="card" style={{ marginBottom: 12 }}>

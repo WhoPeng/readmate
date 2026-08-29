@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import Library from './pages/Library'
 import BookDetail from './pages/BookDetail'
 import Reader from './pages/Reader'
+import BookReport from './pages/BookReport'
+import Archive from './pages/Archive'
 import Settings from './pages/Settings'
 import { api } from './api/client'
 
@@ -36,6 +38,10 @@ export default function App() {
 
   const renderPage = () => {
     if (route.startsWith('/library')) return <Library />
+    if (route.includes('/report')) {
+      const id = Number(route.split('/')[2])
+      return <BookReport bookId={id} />
+    }
     if (route.startsWith('/book/')) {
       const id = Number(route.split('/')[2])
       return <BookDetail bookId={id} />
@@ -44,6 +50,7 @@ export default function App() {
       const id = Number(route.split('/')[2])
       return <Reader bookId={id} />
     }
+    if (route.startsWith('/archive')) return <Archive />
     if (route.startsWith('/settings')) return <Settings />
     return <div className="empty">页面建设中：{route}</div>
   }

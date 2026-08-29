@@ -11,7 +11,7 @@ def test_export_import_roundtrip(client, minimal_epub):
     client.post(f"/api/books/{book_id}/notes", json={"chapter_id": detail["chapters"][0]["id"], "content": "备份前笔记"})
 
     # 导出
-    export = client.post("/api/backup/export")
+    export = client.get("/api/backup/export")
     assert export.status_code == 200
     assert export.headers["content-type"] == "application/zip"
     zf = zipfile.ZipFile(io.BytesIO(export.content))

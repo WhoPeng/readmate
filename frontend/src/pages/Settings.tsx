@@ -5,6 +5,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import type { ProviderConfig } from '../../../shared/types'
+import { api } from '../api/client'
 
 export default function Settings() {
   const rm = window.readmate
@@ -171,11 +172,58 @@ export default function Settings() {
         )}
       </div>
 
-      <div className="card">
+      <div className="card" style={{ marginBottom: 20 }}>
         <h3 style={{ fontSize: 15, marginBottom: 10 }}>阅读偏好</h3>
         <p className="muted" style={{ fontSize: 13 }}>
           字体大小、行距与主题在阅读器右上角「Aa 设置」中调整，自动保存。
         </p>
+      </div>
+
+      <div className="card">
+        <h3 style={{ fontSize: 15, marginBottom: 10 }}>数据备份（FR-23）</h3>
+        <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+          导出包含全部书籍与阅读记录的备份文件；导入会覆盖当前数据（不含明文密钥）。
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={async () => {
+              try {
+                const blob = await api.exportBackup()
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `readmate-backup-${new Date().toISOString().slice(0, 10)}.zip`
+                a.click()
+                URL.revokeObjectURL(url)
+              } catch (e) {
+                alert(e instanceof Error ? e.message : '导出失败')
+              }
+            }}
+          >
+            导出备份
+          </button>
+          <label style={{ alignSelf: 'center' }}>
+            <input
+              type="file"
+              accept=".zip"
+              style={{ display: 'none' }}
+              onChange={async (e) => {
+                const f = e.target.files?.[0]
+                if (!f) return
+                if (!confirm('导入备份会覆盖当前全部数据，确定继续？')) return
+                try {
+                  await api.importBackup(f)
+                  alert('恢复成功')
+                  window.location.hash = '#/library'
+                  window.location.reload()
+                } catch (err) {
+                  alert(err instanceof Error ? err.message : '恢复失败')
+                }
+              }}
+            />
+            <span style={{ cursor: 'pointer', color: 'var(--accent)' }}>导入备份…</span>
+          </label>
+        </div>
       </div>
     </div>
   )

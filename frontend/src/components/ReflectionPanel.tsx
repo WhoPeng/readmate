@@ -260,6 +260,7 @@ export default function ReflectionPanel({ book, mode, chapterId, onDone }: Props
       misunderstanding?: string
       disagreement?: string
       ai_feedback?: string
+      final_question?: string
     }>(aiText)
 
     if (!parsed) {
@@ -272,7 +273,7 @@ export default function ReflectionPanel({ book, mode, chapterId, onDone }: Props
       chapter_id: chapterId,
       reader_feeling: '',
       reader_understanding: '',
-      reader_questions: '',
+      reader_questions: parsed.final_question ?? '', // AI 留给读者的思考问题 → 我的问题列表
       ai_feedback: parsed.ai_feedback ?? '',
       author_position: {
         core_claim: parsed.core_claim ?? '',
