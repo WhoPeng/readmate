@@ -119,3 +119,18 @@ def api_book_cover(book_id: int, db: Session = Depends(get_db)):
     if not book.cover_path:
         raise HTTPException(status_code=404, detail="无封面")
     return FileResponse(book.cover_path, media_type="image/jpeg" if book.cover_path.endswith("jpg") else "image/png")
+
+
+@router.get("/chapters/{chapter_id}/text")
+def api_chapter_text(chapter_id: int, db: Session = Depends(get_db)):
+    """按需提取章节纯文本（AI Context 用；正文不落库，渲染仍由 epub.js 完成）。"""
+    from app.models.book import Chapter
+    from app.services.book_service import extract_chapter_text
+
+    chapter = db.get(Chapter, chapter_id)
+    if chapter is None:
+        raise HTTPException(status_code=404, detail="章节不存在")
+    book = db.get(Book, chapter.book_id)
+    if book is None:
+        raise HTTPException(status_code=404, detail="书籍不存在")
+    return {"chapter_id": chapter_id, "text": extract_chapter_text(book, chapter)}

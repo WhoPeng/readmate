@@ -130,7 +130,7 @@ export default function EpubViewer({
             // fromRange 返回纯对象（无 toString），需合并进 EpubCFI 实例再 toString。
             // base = 章节 CFI 前缀（不含 epubcfi( 前缀，parseComponent 期望组件串，
             // 如 /6/4[ch1.xhtml]! —— spinePos 取自 steps[1].index）
-            const locCfi = rendition.currentLocation()?.start?.cfi ?? ''
+            const locCfi = (rendition as any).currentLocation?.()?.start?.cfi ?? ''
             const bang = locCfi.indexOf('!')
             const base = bang >= 0 ? locCfi.slice('epubcfi('.length, bang + 1) : ''
             const toCfiString = (r: Range) =>

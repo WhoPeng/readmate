@@ -1,15 +1,38 @@
 """书籍导入服务：文件管理 + 元数据解析 + 入库（books/chapters）。"""
 import json
+import re
 import shutil
 import uuid
 from pathlib import Path
 
+from ebooklib import ITEM_DOCUMENT, epub
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import config
 from app.infrastructure.parsers.epub_meta import EpubParseError, parse_epub
 from app.models.book import Book, Chapter
+
+_TAG_RE = re.compile(r"<[^>]+>")
+
+
+def extract_chapter_text(book: Book, chapter: Chapter, max_chars: int = 8000) -> str:
+    """按需从 EPUB 原文件提取章节纯文本（AI Context 用，正文不落库）。
+
+    max_chars 截断上限（默认 8000 字符 ≈ 2k tokens，超长章节防爆上下文）。
+    """
+    try:
+        epub_book = epub.read_epub(book.file_path)
+    except Exception:
+        return ""
+    for item in epub_book.get_items_of_type(ITEM_DOCUMENT):
+        if item.get_name() == chapter.chapter_cfi:
+            html = item.get_content().decode("utf-8", errors="replace")
+            text = re.sub(r"\s+", " ", _TAG_RE.sub(" ", html)).strip()
+            if len(text) > max_chars:
+                text = text[:max_chars] + "…（已截断）"
+            return text
+    return ""
 
 COVER_FILENAME = "cover{ext}"
 

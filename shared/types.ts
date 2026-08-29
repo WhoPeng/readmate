@@ -62,6 +62,7 @@ export interface ReadmateApi {
   }
   store: {
     listProviders(): Promise<ProviderConfig[]>
+    defaultProviders(): Promise<ProviderConfig[]>
     saveProvider(config: ProviderConfig, apiKey?: string): Promise<void>
     deleteProvider(id: string): Promise<void>
     hasKey(providerId: string): Promise<boolean>

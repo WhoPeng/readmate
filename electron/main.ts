@@ -8,6 +8,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import { spawn, type ChildProcess } from 'child_process'
 import * as path from 'path'
+import { registerAiIpc } from './ai/ipc'
+import { registerStoreIpc } from './storeIpc'
 
 const BACKEND_URL = 'http://127.0.0.1:8000'
 const DEV_SERVER_URL = 'http://localhost:5173'
@@ -55,6 +57,8 @@ function stopBackend(): void {
 function registerAppIpc(): void {
   ipcMain.handle('app:version', () => app.getVersion())
   ipcMain.handle('app:pingBackend', () => backendAlive())
+  registerAiIpc()
+  registerStoreIpc()
 }
 
 function createWindow(): void {

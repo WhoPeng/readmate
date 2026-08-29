@@ -1,25 +1,39 @@
 /**
  * preload：向 renderer 暴露最小 IPC 面（contextIsolation 下唯一通道）。
- * AI 与密钥接口在步骤 11/12 填充真实现，当前为占位（renderer 调用会得到明确错误）。
+ * - ai：流式对话（token 事件回传）、测试连接、中断
+ * - store：Provider 配置（Key 只见掩码）
+ * - app：版本与后端连通
  */
-import { contextBridge, ipcRenderer } from 'electron'
-import type { ReadmateApi } from '../shared/types'
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron'
+import type { ChatRequest, ConnectionResult, ProviderConfig, ReadmateApi } from '../shared/types'
 
 const api: ReadmateApi = {
   ai: {
-    chatStream: () => Promise.reject(new Error('AI 功能尚未启用（步骤 11 实现）')),
-    testConnection: () => Promise.reject(new Error('AI 功能尚未启用（步骤 11 实现）')),
-    cancel: () => undefined,
+    chatStream: (req: ChatRequest, onToken: (t: string) => void, signal?: AbortSignal): Promise<any> => {
+      const requestId = Math.random().toString(36).slice(2)
+      const listener = (_e: IpcRendererEvent, token: string) => onToken(token)
+      ipcRenderer.on(`ai:token:${requestId}`, listener)
+      return ipcRenderer
+        .invoke('ai:chatStream', { ...req, requestId })
+        .finally(() => ipcRenderer.removeListener(`ai:token:${requestId}`, listener))
+    },
+    testConnection: (providerId: string): Promise<ConnectionResult> =>
+      ipcRenderer.invoke('ai:testConnection', providerId),
+    cancel: () => {
+      ipcRenderer.invoke('ai:cancel').catch(() => undefined)
+    },
   },
   store: {
-    listProviders: () => Promise.resolve([]),
-    saveProvider: () => Promise.resolve(),
-    deleteProvider: () => Promise.resolve(),
-    hasKey: () => Promise.resolve(false),
+    listProviders: (): Promise<ProviderConfig[]> => ipcRenderer.invoke('store:listProviders'),
+    defaultProviders: (): Promise<ProviderConfig[]> => ipcRenderer.invoke('store:defaultProviders'),
+    saveProvider: (config: ProviderConfig, apiKey?: string): Promise<void> =>
+      ipcRenderer.invoke('store:saveProvider', config, apiKey),
+    deleteProvider: (id: string): Promise<void> => ipcRenderer.invoke('store:deleteProvider', id),
+    hasKey: (id: string): Promise<boolean> => ipcRenderer.invoke('store:hasKey', id),
   },
   app: {
-    version: () => ipcRenderer.invoke('app:version'),
-    pingBackend: () => ipcRenderer.invoke('app:pingBackend'),
+    version: (): Promise<string> => ipcRenderer.invoke('app:version'),
+    pingBackend: (): Promise<boolean> => ipcRenderer.invoke('app:pingBackend'),
   },
 }
 
